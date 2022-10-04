@@ -1,4 +1,8 @@
-﻿using System;
+﻿using IronPython.Hosting;
+using Microsoft.Scripting.Hosting;
+using Newtonsoft.Json;
+using RestSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,42 +25,89 @@ namespace Client
     /// </summary>
     public partial class MainWindow : Window
     {
+        readonly string URL = "http://localhost:60238/";
+
+        ScriptEngine python;
+        ScriptScope scope;
+
+        List<string> jobs;
+
         public MainWindow()
         {
             InitializeComponent();
-            new Thread(Networking).Start();
-            new Thread(Server).Start();
 
+            this.python = Python.CreateEngine();
+            this.scope = this.python.CreateScope();
+
+            jobs = new List<string>();
+
+            //new Thread(NetworkingAsync).Start();
+            //new Thread(Server).Start();
+            //var eggsTask = NetworkingAsync();
+            Task.Run(() => NetworkingAsync());
+            Task.Run(() => ServerAsync());
         }
 
-        private void Networking()
+        private Task NetworkingAsync()
         {
             while (true)
             {
-                Thread.Sleep(5000);
+                UpdateMessage("Networking is runing");
+                Console.WriteLine("Networking is runing");
+                Thread.Sleep(1000);
+
                 // The first part needs to query the Web Service for a list of other clients
-                // Look for new clients
+                // Look for new clients'
 
-
+                string result;
+                RestClient client = new RestClient(URL);
+                RestRequest restRequest = new RestRequest("api/values/1", Method.Get);
+                RestResponse restResponse = client.Execute(restRequest);
+                if (restResponse.IsSuccessful)
+                {
+                    result = JsonConvert.DeserializeObject<string>(restResponse.Content);
+                    Console.WriteLine(result);
+                }
+                else if (restResponse.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    MessageBox.Show("Get fail! NotFound!", "Message", MessageBoxButton.OK);
+                }
+                else
+                {
+                    Console.WriteLine(restResponse.Content);
+                    MessageBox.Show("Get fail!", "Error", MessageBoxButton.OK);
+                }
+                
                 // Check each client for jobs, and do them if it can. 
-                UpdateMessage("Networking msg");
-                Console.WriteLine("Networking");
+   
             }
         }
 
-        private void Server()
+        private void ServerAsync()
         {
             while (true)
             {
-                Thread.Sleep(5000);
-                UpdateMessage("Server msg");
-                Console.WriteLine("Server");
+                UpdateMessage("Server is runing");
+                Console.WriteLine("Server is runing");
+                Thread.Sleep(1000);
+
+                if (jobs.Count != 0)
+                {
+                    // read from jobs
+                    string script = jobs[0];
+                    dynamic dynamicResult = python.Execute(script);
+                    Console.WriteLine($"dynamic result: {dynamicResult}");
+  
+                    // remove from jobs
+                    jobs.Remove(script);
+                }
             }
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine("Main");
+            jobs.Add(ConvertRichTextBoxContentsToString(paythonRichText));
+            Console.WriteLine("Submitting");
         }
 
         private void UpdateMessage(string msg)
@@ -64,5 +115,11 @@ namespace Client
             Dispatcher.Invoke(() => { txtMessage.Text = msg; });
         }
 
+        private string ConvertRichTextBoxContentsToString(RichTextBox rtb)
+        {
+            TextRange textRange = new TextRange(rtb.Document.ContentStart, rtb.Document.ContentEnd);
+            return textRange.Text;
+
+        }
     }
 }

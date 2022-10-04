@@ -7,8 +7,16 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        <Button Content="Main" HorizontalAlignment="Left" Height="36" Margin="228,91,0,0" VerticalAlignment="Top" Width="99" Click="Button_Click"/>
-        <TextBox x:Name="txtMessage" HorizontalAlignment="Left" Height="78" Margin="218,168,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="140" />
+        <Button Content="Submit" HorizontalAlignment="Center" Height="36" VerticalAlignment="Center" Width="100" Click="Button_Click" RenderTransformOrigin="1.457,0.538"/>
+        <TextBox x:Name="txtMessage" HorizontalAlignment="Left" Height="30" Margin="63,5,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="162" />
+        <RichTextBox x:Name="paythonRichText" Margin="10,66,464,65">
+            <FlowDocument>
+                <Paragraph>
+                    <Run Text=""/>
+                </Paragraph>
+            </FlowDocument>
+        </RichTextBox>
+
 
     </Grid>
 </Window>
