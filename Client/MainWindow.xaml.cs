@@ -59,13 +59,13 @@ namespace Client
                 // The first part needs to query the Web Service for a list of other clients
                 // Look for new clients'
 
-                string result;
+                List<ClientInfo> result;
                 RestClient client = new RestClient(URL);
-                RestRequest restRequest = new RestRequest("api/values/1", Method.Get);
+                RestRequest restRequest = new RestRequest("api/Clients", Method.Get);
                 RestResponse restResponse = client.Execute(restRequest);
                 if (restResponse.IsSuccessful)
                 {
-                    result = JsonConvert.DeserializeObject<string>(restResponse.Content);
+                    result = JsonConvert.DeserializeObject<List<ClientInfo>>(restResponse.Content);
                     Console.WriteLine(result);
                 }
                 else if (restResponse.StatusCode == System.Net.HttpStatusCode.NotFound)
