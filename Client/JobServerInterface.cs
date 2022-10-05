@@ -13,6 +13,6 @@ namespace Client
         [OperationContract]
         void DownloadJob(out string script, out int jobId);
         [OperationContract]
-        void uploadSolution(int jobId, int clientId, dynamic dynamicResult);
+        void UploadSolution(int jobId, int clientId, dynamic dynamicResult);
     }
 }

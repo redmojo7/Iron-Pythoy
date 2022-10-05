@@ -43,6 +43,8 @@ namespace Client
 
         private JobServerInterface foob;
 
+        private int myClientId;
+
         //private StudentBusinessServerInterface foob;
 
         public MainWindow()
@@ -63,6 +65,7 @@ namespace Client
             //var eggsTask = NetworkingAsync();
             Task.Run(() => NetworkingAsync());
             Task.Run(() => ServerAsync());
+            
         }
 
         private void InitializeRemoting()
@@ -95,7 +98,9 @@ namespace Client
             RestResponse restResponse = client.Execute(restRequest);
             if (restResponse.IsSuccessful)
             {
-                Console.WriteLine("Register To Sever successfully");
+                ClientInfo ClientInfo = JsonConvert.DeserializeObject<ClientInfo>(restResponse.Content);
+                myClientId = ClientInfo.Id;
+                Console.WriteLine($"Register To Sever successfully! myClientId = {myClientId}");
             }
             else
             {
@@ -137,9 +142,25 @@ namespace Client
                     Console.WriteLine(restResponse.Content);
                     MessageBox.Show("Get fail!", "Error", MessageBoxButton.OK);
                 }
-                
-                // Check each client for jobs, and do them if it can. 
-   
+
+                // refresh GUI
+                Dispatcher.Invoke(() => {
+                    // clears
+                    jobListView.Items.Clear();
+                    foreach (Job temp in MyJob.jobs)
+                    {
+                        int numCompleted = temp.ClientInfos.FindAll(x => x.Answered).Count();
+                        int numTotal = temp.ClientInfos.Count();
+                        // refresh
+                        jobListView.Items.Add(new
+                        {
+                            Id = temp.Id,
+                            Status = numCompleted == numTotal ? "Done" : "Working",
+                            Total = numTotal,
+                            Finished = numCompleted
+                        });
+                    }
+                });
             }
         }
 
@@ -160,7 +181,7 @@ namespace Client
             return (jobId: jobId, script: script);
         }
 
-        private void uploadSolution(ClientInfo clientInfo, int jobId, dynamic dynamicResult)
+        private void uploadSolution(ClientInfo clientInfo, int myClientId, int jobId, dynamic dynamicResult)
         {
             // for client side
             ChannelFactory<JobServerInterface> foobFactory;
@@ -170,7 +191,7 @@ namespace Client
             Console.WriteLine($"dowmloadJob from {URL}");
             foobFactory = new ChannelFactory<JobServerInterface>(netTcpBinding, URL);
             foob = foobFactory.CreateChannel();
-            foob.uploadSolution(jobId, clientInfo.Id,  dynamicResult);
+            foob.UploadSolution(jobId, myClientId,  dynamicResult);
             foobFactory.Close();
         }
 
@@ -194,7 +215,7 @@ namespace Client
                         dynamic dynamicResult = python.Execute(job.script);
                         Console.WriteLine($"dynamic result: {dynamicResult}");
                         // upload solutions 
-                        uploadSolution(clientInfo, job.jobId, dynamicResult);
+                        uploadSolution(clientInfo, myClientId, job.jobId, dynamicResult);
                     }
                 }
 

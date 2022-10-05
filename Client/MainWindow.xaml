@@ -5,17 +5,29 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Client"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="1186">
     <Grid>
-        <Button Content="Submit" HorizontalAlignment="Center" Height="36" VerticalAlignment="Center" Width="100" Click="Button_Click" RenderTransformOrigin="1.457,0.538"/>
+        <Button Content="Submit" HorizontalAlignment="Left" Height="36" VerticalAlignment="Top" Width="100" Click="Button_Click" RenderTransformOrigin="1.457,0.538" Margin="177,374,0,0"/>
         <TextBox x:Name="txtMessage" HorizontalAlignment="Left" Height="30" Margin="63,5,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="162" />
-        <RichTextBox x:Name="paythonRichText" Margin="10,66,464,65">
+        <RichTextBox x:Name="paythonRichText" Margin="10,100,736,76">
             <FlowDocument>
                 <Paragraph>
                     <Run Text=""/>
                 </Paragraph>
             </FlowDocument>
         </RichTextBox>
+        <ListView Name="jobListView" Margin="497,100,202,76" >
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Id" Width="120" DisplayMemberBinding="{Binding Id}" />
+                    <GridViewColumn Header="Status" Width="120" DisplayMemberBinding="{Binding Status}"/>
+                    <GridViewColumn Header="Total" Width="120" DisplayMemberBinding="{Binding Total}"/>
+                    <GridViewColumn Header="Finished" Width="120" DisplayMemberBinding="{Binding Finished}"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+        <Label Content="Python Codes" HorizontalAlignment="Left" Margin="194,69,0,0" VerticalAlignment="Top"/>
+        <Label Content="Jobs" HorizontalAlignment="Left" Margin="607,64,0,0" VerticalAlignment="Top"/>
 
 
     </Grid>

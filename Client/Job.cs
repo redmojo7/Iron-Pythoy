@@ -7,21 +7,18 @@ using System.Threading.Tasks;
 
 namespace Client
 {
-    [DataContract]
     internal class Job
     {
-        [DataMember]
-        internal int id { get; set; }
-        [DataMember]
-        internal string script { get; set; }
-        [DataMember]
-        internal List<ClientInfo> clientInfos { get; set; }
+        internal int Id { get; set; }
+
+        internal string Script { get; set; }
+        internal List<ClientInfo> ClientInfos { get; set; }
 
         public Job(string script, List<ClientInfo> clientInfos)
         {
-            this.id = new Random().Next(10000, 99999);
-            this.script = script;
-            this.clientInfos = clientInfos;
+            this.Id = new Random().Next(10000, 99999);
+            this.Script = script;
+            this.ClientInfos = clientInfos;
         }
     }
 }
