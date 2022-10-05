@@ -18,6 +18,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using static IronPython.Modules._ast;
 
 namespace Client
 {
@@ -30,6 +31,8 @@ namespace Client
         string myHost = "localhost";
 
         readonly string URL = "http://localhost:60238/";
+
+        private int completedJobsNum = 0;
 
         ScriptEngine python;
         ScriptScope scope;
@@ -105,14 +108,15 @@ namespace Client
                 // The first part needs to query the Web Service for a list of other clients
                 // Look for new clients'
 
-                List<ClientInfo> result;
+                List<ClientInfo> otherClients;
                 RestClient client = new RestClient(URL);
                 RestRequest restRequest = new RestRequest("api/Clients", Method.Get);
                 RestResponse restResponse = client.Execute(restRequest);
                 if (restResponse.IsSuccessful)
                 {
-                    result = JsonConvert.DeserializeObject<List<ClientInfo>>(restResponse.Content);
-                    Console.WriteLine(result);
+                    List<ClientInfo> ClientInfos = JsonConvert.DeserializeObject<List<ClientInfo>>(restResponse.Content);
+                    otherClients = ClientInfos.Where(x => x.Host!=myHost && x.Port!=myEendpoint).ToList();
+                    Console.WriteLine(otherClients);
                 }
                 else if (restResponse.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {
