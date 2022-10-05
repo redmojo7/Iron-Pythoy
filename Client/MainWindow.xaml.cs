@@ -27,17 +27,21 @@ namespace Client
     /// </summary>
     public partial class MainWindow : Window
     {
-        int myEendpoint = 8200;
+        int myEendpoint = 8100 + new Random().Next(1000);
         string myHost = "localhost";
 
         readonly string URL = "http://localhost:60238/";
 
         private int completedJobsNum = 0;
 
+        List<ClientInfo> aliveClients = new List<ClientInfo>();
+
         ScriptEngine python;
         ScriptScope scope;
 
         List<string> jobs;
+
+        private JobServerInterface foob;
 
         //private StudentBusinessServerInterface foob;
 
@@ -53,6 +57,7 @@ namespace Client
             RegisterToSever();
             InitializeRemoting();
 
+
             //new Thread(NetworkingAsync).Start();
             //new Thread(Server).Start();
             //var eggsTask = NetworkingAsync();
@@ -62,21 +67,23 @@ namespace Client
 
         private void InitializeRemoting()
         {
+            // for server side
+
             Console.WriteLine("hey so like welcome to my client");
             //This is the actual host service system
             ServiceHost host;
             //This represents a tcp/ip binding in the Windows network stack
             NetTcpBinding tcp = new NetTcpBinding();
             //Bind server to the implementation of DataServer
-            //host = new ServiceHost(typeof(StudentBusinessServerImpl));
+            host = new ServiceHost(typeof(JobServerImpl));
             /*Present the publicly accessible interface to the client. 0.0.0.0 tells .net to
             accept on any interface. :8100 means this will use port 8100. DataService is a name for the
             actual service, this can be any string.*/
 
-            //host.AddServiceEndpoint(typeof(StudentBusinessServerInterface), tcp, "net.tcp://0.0.0.0:8200/BusinessServer");
+            host.AddServiceEndpoint(typeof(JobServerInterface), tcp, "net.tcp://0.0.0.0:"+ myEendpoint + "/JobServer");
             //And open the host for business!
-            //host.Open();
-            //Console.WriteLine($"Client {host.Description} Online");
+            host.Open();
+            Console.WriteLine($"Client {host.Description} Online"); 
         }
 
         private void RegisterToSever()
@@ -108,16 +115,19 @@ namespace Client
                 // The first part needs to query the Web Service for a list of other clients
                 // Look for new clients'
 
-                List<ClientInfo> otherClients;
                 RestClient client = new RestClient(URL);
                 RestRequest restRequest = new RestRequest("api/Clients", Method.Get);
                 RestResponse restResponse = client.Execute(restRequest);
                 if (restResponse.IsSuccessful)
                 {
                     List<ClientInfo> ClientInfos = JsonConvert.DeserializeObject<List<ClientInfo>>(restResponse.Content);
-                    otherClients = ClientInfos.Where(x => x.Host!=myHost && x.Port!=myEendpoint).ToList();
-                    Console.WriteLine(otherClients);
+                    // update aliveClients
+                    aliveClients = ClientInfos.Where(x => 
+                        (x.Host!=myHost) || (x.Host == myHost && x.Port != myEendpoint)
+                    ).ToList();
+                    Console.WriteLine(aliveClients);
                 }
+
                 else if (restResponse.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {
                     MessageBox.Show("Get fail! NotFound!", "Message", MessageBoxButton.OK);
@@ -133,6 +143,37 @@ namespace Client
             }
         }
 
+        private (int jobId, string script) dowmloadJob(ClientInfo clientInfo)
+        {
+            string script = null;
+            int jobId = -1;
+            // for client side
+            ChannelFactory<JobServerInterface> foobFactory;
+            NetTcpBinding netTcpBinding = new NetTcpBinding();
+            //Set the URL and create the connection!
+            string URL = "net.tcp://"+ clientInfo.Host+ ":" + clientInfo.Port + "/JobServer";
+            Console.WriteLine($"dowmloadJob from {URL}");
+            foobFactory = new ChannelFactory<JobServerInterface>(netTcpBinding, URL);
+            foob = foobFactory.CreateChannel();
+            foob.DownloadJob(out script, out jobId);
+            foobFactory.Close();
+            return (jobId: jobId, script: script);
+        }
+
+        private void uploadSolution(ClientInfo clientInfo, int jobId, dynamic dynamicResult)
+        {
+            // for client side
+            ChannelFactory<JobServerInterface> foobFactory;
+            NetTcpBinding netTcpBinding = new NetTcpBinding();
+            //Set the URL and create the connection!
+            string URL = "net.tcp://" + clientInfo.Host + ":" + clientInfo.Port + "/JobServer";
+            Console.WriteLine($"dowmloadJob from {URL}");
+            foobFactory = new ChannelFactory<JobServerInterface>(netTcpBinding, URL);
+            foob = foobFactory.CreateChannel();
+            foob.uploadSolution(jobId, clientInfo.Id,  dynamicResult);
+            foobFactory.Close();
+        }
+
         private void ServerAsync()
         {
             while (true)
@@ -140,6 +181,22 @@ namespace Client
                 UpdateMessage("Server is runing");
                 Console.WriteLine("Server is runing");
                 Thread.Sleep(1000);
+
+
+                // onnect to the .NET Remoting server at the IP address and port in the list
+                // query if any jobs exist and download them.
+                foreach (ClientInfo clientInfo in aliveClients)
+                {
+                    var job = dowmloadJob(clientInfo);
+                    if (job.script != null)
+                    {
+                        Console.WriteLine($"Execue script : {job.script}");
+                        dynamic dynamicResult = python.Execute(job.script);
+                        Console.WriteLine($"dynamic result: {dynamicResult}");
+                        // upload solutions 
+                        uploadSolution(clientInfo, job.jobId, dynamicResult);
+                    }
+                }
 
                 if (jobs.Count != 0)
                 {
@@ -154,9 +211,11 @@ namespace Client
             }
         }
 
+
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            jobs.Add(ConvertRichTextBoxContentsToString(paythonRichText));
+            string script = ConvertRichTextBoxContentsToString(paythonRichText);  
+            MyJob.jobs.Add(new Job(script, aliveClients));
             Console.WriteLine("Submitting");
         }
 

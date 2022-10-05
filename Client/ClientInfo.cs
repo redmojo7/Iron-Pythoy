@@ -18,5 +18,7 @@ namespace Client
         public int Id { get; set; }
         public string Host { get; set; }
         public int Port { get; set; }
+        public bool Downloaded { get; set; }
+        public bool Answered { get; set; }
     }
 }
