@@ -7,7 +7,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend", "Backend\Backend.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "Client\Client.csproj", "{0857B6A8-A16F-4956-8CD9-971C308BBAE3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frontend", "Frontend\Frontend.csproj", "{EFF95BC2-97B7-4B10-AA16-EE2FCB8BB1A5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Frontend", "Frontend\Frontend.csproj", "{EFF95BC2-97B7-4B10-AA16-EE2FCB8BB1A5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F6F67E31-72F9-4BDF-B6C0-96D294DBB641}"
+	ProjectSection(SolutionItems) = preProject
+		Common\JobServerInterface.cs = Common\JobServerInterface.cs
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

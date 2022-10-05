@@ -1,32 +1,45 @@
-﻿using Frontend.Models;
+﻿using Client.Common;
+using Frontend.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
+using Newtonsoft.Json;
+using RestSharp;
+using System.ServiceModel;
 
 namespace Frontend.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
-        {
-            _logger = logger;
-        }
-
         public IActionResult Index()
         {
-            return View();
-        }
+            List<ClientInfo> clientInfos = new List<ClientInfo>();
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
+            //clientInfos.Add(new ClientInfo(1, "localhost", 8080, 10));
+            //clientInfos.Add(new ClientInfo(2, "localhost", 8082, 2));
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            // all clients
+            RestClient restClient = new RestClient("http://localhost:60238/");
+            RestRequest restRequest = new RestRequest("api/clients", Method.Get);
+            RestResponse restResponse = restClient.Execute(restRequest);
+
+            List<Backend.Models.Client> clients = JsonConvert.DeserializeObject<List<Backend.Models.Client>>(restResponse.Content);
+            foreach (Backend.Models.Client client in clients)
+            {
+                ChannelFactory<JobServerInterface> foobFactory;
+                NetTcpBinding netTcpBinding = new NetTcpBinding();
+                //Set the URL and create the connection!
+                string URL = "net.tcp://" + client.Host + ":" + client.Port + "/JobServer";
+                Console.WriteLine($"dowmloadJob from {URL}");
+                foobFactory = new ChannelFactory<JobServerInterface>(netTcpBinding, URL);
+                JobServerInterface foob = foobFactory.CreateChannel();
+                int numCompletedJobs = 0;
+                foob.FetchJobInfo(out numCompletedJobs);
+                foobFactory.Close();
+
+                // add into clientInfos
+                clientInfos.Add(new ClientInfo(client.Id, client.Host, client.Port, numCompletedJobs));
+            }
+
+            return View(clientInfos);
         }
     }
 }

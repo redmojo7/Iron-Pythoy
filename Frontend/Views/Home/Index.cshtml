@@ -1,8 +1,25 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
 }
+@{
+    @using Frontend.Models;
+    @model IEnumerable<ClientInfo>;
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+}
+<div id="tableview" style="width:1025px; height:300px; overflow-y:scroll;">
+    <table style="border: 1px solid black" cellspacing="0" width="900px" id="dataTableDetail" align="center">
+        <caption>Clients Info</caption>
+          <tr>
+            <th style="border: 1px solid black">Id</th>
+            <th style="border: 1px solid black">URL</th>
+            <th style="border: 1px solid black">Num of Completed Jobs</th>
+          </tr>
+        @foreach (var client in Model)
+        {
+            <tr style="border: 1px solid black">
+                <td style="border: 1px solid black">@client.Id</td>
+                <td style="border: 1px solid black">http://@client.Host:@client.Port</td>
+                <td style="border: 1px solid black">@client.NumCompletedJobs</td>
+            </tr>
+        }
+    </table>
 </div>

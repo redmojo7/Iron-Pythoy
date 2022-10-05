@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.ServiceModel;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ServiceModel;
 
-namespace Client
+namespace Client.Common
 {
     [ServiceContract]
-    internal interface JobServerInterface
+    public interface JobServerInterface
     {
         [OperationContract]
         void DownloadJob(out string script, out int jobId);
         [OperationContract]
         void UploadSolution(int jobId, int clientId, dynamic dynamicResult);
+        [OperationContract]
+        void FetchJobInfo(out int numCompletedJobs);
     }
 }

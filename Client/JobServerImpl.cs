@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Client.Common;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Client
 {
@@ -31,7 +29,7 @@ namespace Client
         public void DownloadJob(out string script, out int jobId)
         {
             script = null;
-             jobId = -1;
+            jobId = -1;
             if (MyJob.jobs != null && MyJob.jobs.Count > 0) 
             {
                 foreach (Job tempJob in MyJob.jobs) 
@@ -45,6 +43,23 @@ namespace Client
                             info.Downloaded = true;
                             return;
                         }
+                    }
+                }
+            }
+        }
+
+        public void FetchJobInfo(out int numCompletedJobs)
+        {
+            numCompletedJobs = 0;
+            if (MyJob.jobs != null && MyJob.jobs.Count > 0)
+            {
+                foreach (Job tempJob in MyJob.jobs)
+                {
+                    int numCompleted = tempJob.ClientInfos.FindAll(x => x.Answered).Count();
+                    int numTotal = tempJob.ClientInfos.Count();
+                    if (numCompleted == numTotal)
+                    {
+                        numCompletedJobs++;
                     }
                 }
             }
