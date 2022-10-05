@@ -6,20 +6,51 @@
 
 }
 <div id="tableview" style="width:1025px; height:300px; overflow-y:scroll;">
-    <table style="border: 1px solid black" cellspacing="0" width="900px" id="dataTableDetail" align="center">
+    <table cellspacing="0" width="900px" id="dataTableDetail">
         <caption>Clients Info</caption>
           <tr>
-            <th style="border: 1px solid black">Id</th>
-            <th style="border: 1px solid black">URL</th>
-            <th style="border: 1px solid black">Num of Completed Jobs</th>
+            <th>Id</th>
+            <th>URL</th>
+            <th>Num of Completed Jobs</th>
           </tr>
         @foreach (var client in Model)
         {
-            <tr style="border: 1px solid black">
-                <td style="border: 1px solid black">@client.Id</td>
-                <td style="border: 1px solid black">http://@client.Host:@client.Port</td>
-                <td style="border: 1px solid black">@client.NumCompletedJobs</td>
+            <tr>
+                <td>@client.Id</td>
+                <td>http://@client.Host:@client.Port</td>
+                <td>@client.NumCompletedJobs</td>
             </tr>
         }
     </table>
 </div>
+
+<script>
+    setInterval(loadClientInfo, 10000); // 10 seconds
+
+    function loadClientInfo() {
+        $.ajax({
+            url: '/home/ClientInfo/',
+            type: 'get',
+            contentType: 'application/json',
+            processData: false,
+            success: function (data, textStatus, jQxhr) {
+                $("#dataTableDetail > tbody").find("tr:gt(0)").remove();
+                for (i = 0; i < data.length; i++) {
+                    var $row = $('<tr>' +
+                        "<td>" + data[i].id + "</td>" + 
+                        "<td>http://" + data[i].host + ":" + data[i].port + "</td>" + 
+                        "<td>" + data[i].numCompletedJobs + "</td>");
+                    $("#dataTableDetail").append($row);
+  
+                }
+            },
+            error: function (xhr, textStatus, error) {
+                alert("Error: " + xhr.responseText);
+                console.log(xhr.statusText);
+                console.log(textStatus);
+                console.log(error);
+            }
+        });
+    }
+
+</script>
