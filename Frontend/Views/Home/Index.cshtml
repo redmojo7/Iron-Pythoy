@@ -20,7 +20,10 @@
                 <td>@client.Id</td>
                 <td>http://@client.Host:@client.Port</td>
                 <td>@client.NumCompletedJobs</td>
-                <td>@client.Status</td>
+                @{
+                    var status = client.Status ? "Active" : "Dead";
+                }
+                <td>@status</td>
             </tr>
         }
     </table>
@@ -38,11 +41,12 @@
             success: function (data, textStatus, jQxhr) {
                 $("#dataTableDetail > tbody").find("tr:gt(0)").remove();
                 for (i = 0; i < data.length; i++) {
+                    var status = data[i].status ? "Active" : "Dead";
                     var $row = $('<tr>' +
                         "<td>" + data[i].id + "</td>" + 
                         "<td>http://" + data[i].host + ":" + data[i].port + "</td>" + 
                         "<td>" + data[i].numCompletedJobs + "</td>" +
-                        "<td>" + data[i].status + "</td>");
+                        "<td>" + status + "</td>");
                     $("#dataTableDetail").append($row);
   
                 }
