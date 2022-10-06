@@ -230,8 +230,9 @@ namespace Desktop
                     {
                         try
                         {
-                            Console.WriteLine($"Execue script : {job.script}");
-                            dynamic dynamicResult = python.Execute(job.script);
+                            string script = DecodeWithBase64(job.script);
+                            Console.WriteLine($"Execue script : {script}");
+                            dynamic dynamicResult = python.Execute(script);
                             Console.WriteLine($"dynamic result: {dynamicResult}");
                             // upload solutions 
                             uploadSolution(clientInfo, myClientId, job.jobId, dynamicResult);
