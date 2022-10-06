@@ -1,5 +1,5 @@
 ﻿
-using Client.Common;
+using Desktop.Common;
 using IronPython.Hosting;
 using Microsoft.Scripting.Hosting;
 using Newtonsoft.Json;
@@ -22,7 +22,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using static IronPython.Modules._ast;
 
-namespace Client
+namespace Desktop
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -170,32 +170,46 @@ namespace Client
         {
             string script = null;
             int jobId = -1;
-            // for client side
-            ChannelFactory<JobServerInterface> foobFactory;
-            NetTcpBinding netTcpBinding = new NetTcpBinding();
-            //Set the URL and create the connection!
-            string URL = "net.tcp://"+ clientInfo.Host+ ":" + clientInfo.Port + "/JobServer";
-            Console.WriteLine($"dowmloadJob from {URL}");
-            foobFactory = new ChannelFactory<JobServerInterface>(netTcpBinding, URL);
-            foob = foobFactory.CreateChannel();
-            foob.DownloadJob(out script, out jobId);
-            foobFactory.Close();
+            string URL = "net.tcp://" + clientInfo.Host + ":" + clientInfo.Port + "/JobServer";
+            try
+            {
+                // for client side
+                ChannelFactory<JobServerInterface> foobFactory;
+                NetTcpBinding netTcpBinding = new NetTcpBinding();
+                //Set the URL and create the connection!
+                Console.WriteLine($"dowmloadJob from {URL}");
+                foobFactory = new ChannelFactory<JobServerInterface>(netTcpBinding, URL);
+                foob = foobFactory.CreateChannel();
+                foob.DownloadJob(out script, out jobId);
+                foobFactory.Close();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Exception: connect to {URL} failed : {e.Message}");
+            }
             return (jobId: jobId, script: script);
         }
 
         private void uploadSolution(ClientInfo clientInfo, int myClientId, int jobId, dynamic dynamicResult)
         {
-            // for client side
-            ChannelFactory<JobServerInterface> foobFactory;
-            NetTcpBinding netTcpBinding = new NetTcpBinding();
-            //Set the URL and create the connection!
             string URL = "net.tcp://" + clientInfo.Host + ":" + clientInfo.Port + "/JobServer";
-            Console.WriteLine($"dowmloadJob from {URL}");
-            foobFactory = new ChannelFactory<JobServerInterface>(netTcpBinding, URL);
-            foob = foobFactory.CreateChannel();
-            foob.UploadSolution(jobId, myClientId,  dynamicResult);
-            foobFactory.Close();
-        }
+            try 
+            {
+                // for client side
+                ChannelFactory<JobServerInterface> foobFactory;
+                NetTcpBinding netTcpBinding = new NetTcpBinding();
+                //Set the URL and create the connection!
+                Console.WriteLine($"dowmloadJob from {URL}");
+                foobFactory = new ChannelFactory<JobServerInterface>(netTcpBinding, URL);
+                foob = foobFactory.CreateChannel();
+                foob.UploadSolution(jobId, myClientId,  dynamicResult);
+                foobFactory.Close();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Exception: connect to {URL} failed : {e.Message}");
+            }
+}
 
         private void ServerAsync()
         {
@@ -213,11 +227,18 @@ namespace Client
                     var job = dowmloadJob(clientInfo);
                     if (job.script != null)
                     {
-                        Console.WriteLine($"Execue script : {job.script}");
-                        dynamic dynamicResult = python.Execute(job.script);
-                        Console.WriteLine($"dynamic result: {dynamicResult}");
-                        // upload solutions 
-                        uploadSolution(clientInfo, myClientId, job.jobId, dynamicResult);
+                        try
+                        {
+                            Console.WriteLine($"Execue script : {job.script}");
+                            dynamic dynamicResult = python.Execute(job.script);
+                            Console.WriteLine($"dynamic result: {dynamicResult}");
+                            // upload solutions 
+                            uploadSolution(clientInfo, myClientId, job.jobId, dynamicResult);
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine($"Exception: execute script failed : {e.Message}");
+                        }
                     }
                 }
 

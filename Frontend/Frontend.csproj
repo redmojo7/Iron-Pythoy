@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Backend\Backend.csproj" />
-    <ProjectReference Include="..\Client\Client.csproj" />
+    <ProjectReference Include="..\Client\Desktop.csproj" />
   </ItemGroup>
 
   <ItemGroup>

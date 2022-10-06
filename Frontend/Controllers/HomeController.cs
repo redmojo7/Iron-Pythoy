@@ -1,9 +1,9 @@
-﻿using Client.Common;
+﻿using Backend.Models;
+using Desktop.Common;
 using Frontend.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using RestSharp;
-using System.ServiceModel;
 
 namespace Frontend.Controllers
 {
@@ -12,9 +12,11 @@ namespace Frontend.Controllers
         public IActionResult Index()
         {
             List<ClientInfo> clientInfos = new List<ClientInfo>();
-            clientInfos.Add(new ClientInfo(1, "localhost", 8080, 10));
+            /*clientInfos.Add(new ClientInfo(1, "localhost", 8080, 10));
             clientInfos.Add(new ClientInfo(2, "localhost", 8082, 2));
-            //clientInfos = loadClientInfo();
+            clientInfos.Add(new ClientInfo(3, "localhost", 8083, 33));
+            clientInfos.Add(new ClientInfo(4, "localhost", 8084, 23));*/
+            clientInfos = loadClientInfo();
 
             return View(clientInfos);
         }
@@ -26,46 +28,25 @@ namespace Frontend.Controllers
 
             // all clients
             RestClient restClient = new RestClient("http://localhost:60238/");
-            RestRequest restRequest = new RestRequest("api/clients", Method.Get);
+            RestRequest restRequest = new RestRequest("api/clients/info", Method.Get);
             RestResponse restResponse = restClient.Execute(restRequest);
-
-            List<Backend.Models.Client> clients = JsonConvert.DeserializeObject<List<Backend.Models.Client>>(restResponse.Content);
-            foreach (Backend.Models.Client client in clients)
+            if (restResponse.IsSuccessful)
             {
-                //Set the URL and create the connection!
-                string URL = "net.tcp://" + client.Host + ":" + client.Port + "/JobServer";
-                try
-                {
-                    ChannelFactory<JobServerInterface> foobFactory;
-                    NetTcpBinding netTcpBinding = new NetTcpBinding();
-                    //Set the URL and create the connection!
-                    Console.WriteLine($"dowmloadJob from {URL}");
-                    foobFactory = new ChannelFactory<JobServerInterface>(netTcpBinding, URL);
-                    JobServerInterface foob = foobFactory.CreateChannel();
-                    int numCompletedJobs = 0;
-                    foob.FetchJobInfo(out numCompletedJobs);
-                    foobFactory.Close();
-
-                    // add into clientInfos
-                    clientInfos.Add(new ClientInfo(client.Id, client.Host, client.Port, numCompletedJobs));
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine($"Exception connect to {URL} failed : {e.Message}");
-                }
+                clientInfos = JsonConvert.DeserializeObject<List<ClientInfo>>(restResponse.Content);
             }
+            
             return clientInfos;
         }
 
         [HttpGet]
         public IActionResult ClientInfo()
         {
-            //return Ok(loadClientInfo());
-            List<ClientInfo> clientInfos = new List<ClientInfo>();
+            return Ok(loadClientInfo());
+            /*List<ClientInfo> clientInfos = new List<ClientInfo>();
             clientInfos.Add(new ClientInfo(1, "localhost", 8080, 10));
             clientInfos.Add(new ClientInfo(2, "localhost", 8082, 2));
             clientInfos.Add(new ClientInfo(3, "localhost", 8083, 5));
-            return Ok(clientInfos);
+            return Ok(clientInfos);*/
         }
 
 

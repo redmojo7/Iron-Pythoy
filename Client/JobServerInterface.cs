@@ -1,6 +1,6 @@
 ﻿using System.ServiceModel;
 
-namespace Client.Common
+namespace Desktop.Common
 {
     [ServiceContract]
     public interface JobServerInterface

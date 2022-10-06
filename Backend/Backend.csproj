@@ -9,7 +9,7 @@
     <ProductVersion>
     </ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{11F2E760-C4C5-480B-AFD0-BAE438F019A3}</ProjectGuid>
+    <ProjectGuid>{D25F6CD6-382F-4370-ACAD-95713573C528}</ProjectGuid>
     <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -57,6 +57,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Security" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Web.Entity" />
     <Reference Include="System.Web.ApplicationServices" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -170,29 +171,30 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\Client.cs">
-      <DependentUpon>ClientsModel.tt</DependentUpon>
+      <DependentUpon>ClientModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\ClientsModel.Context.cs">
+    <Compile Include="Models\ClientModel.Context.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>ClientsModel.Context.tt</DependentUpon>
+      <DependentUpon>ClientModel.Context.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\ClientsModel.cs">
+    <Compile Include="Models\ClientModel.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>ClientsModel.tt</DependentUpon>
+      <DependentUpon>ClientModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\ClientsModel.Designer.cs">
+    <Compile Include="Models\ClientModel.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>ClientsModel.edmx</DependentUpon>
+      <DependentUpon>ClientModel.edmx</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ScheduledTask.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="App_Data\clientdb.mdf" />
-    <Content Include="App_Data\clientdb_log.ldf">
-      <DependentUpon>clientdb.mdf</DependentUpon>
+    <Content Include="App_Data\ClientDatabase.mdf" />
+    <Content Include="App_Data\ClientDatabase_log.ldf">
+      <DependentUpon>ClientDatabase.mdf</DependentUpon>
     </Content>
     <Content Include="Areas\HelpPage\HelpPage.css" />
     <Content Include="Content\bootstrap-theme.css" />
@@ -202,15 +204,15 @@
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
-    <Content Include="Models\ClientsModel.Context.tt">
+    <Content Include="Models\ClientModel.Context.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>ClientsModel.Context.cs</LastGenOutput>
-      <DependentUpon>ClientsModel.edmx</DependentUpon>
+      <LastGenOutput>ClientModel.Context.cs</LastGenOutput>
+      <DependentUpon>ClientModel.edmx</DependentUpon>
     </Content>
-    <Content Include="Models\ClientsModel.tt">
+    <Content Include="Models\ClientModel.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <DependentUpon>ClientsModel.edmx</DependentUpon>
-      <LastGenOutput>ClientsModel.cs</LastGenOutput>
+      <DependentUpon>ClientModel.edmx</DependentUpon>
+      <LastGenOutput>ClientModel.cs</LastGenOutput>
     </Content>
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
@@ -233,12 +235,12 @@
     <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\CollectionModelDescription.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\ApiGroup.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\Api.cshtml" />
-    <EntityDeploy Include="Models\ClientsModel.edmx">
+    <EntityDeploy Include="Models\ClientModel.edmx">
       <Generator>EntityModelCodeGenerator</Generator>
-      <LastGenOutput>ClientsModel.Designer.cs</LastGenOutput>
+      <LastGenOutput>ClientModel.Designer.cs</LastGenOutput>
     </EntityDeploy>
-    <Content Include="Models\ClientsModel.edmx.diagram">
-      <DependentUpon>ClientsModel.edmx</DependentUpon>
+    <Content Include="Models\ClientModel.edmx.diagram">
+      <DependentUpon>ClientModel.edmx</DependentUpon>
     </Content>
     <None Include="Scripts\jquery-3.4.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.4.1.js" />
@@ -261,7 +263,12 @@
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Client\Desktop.csproj">
+      <Project>{0857B6A8-A16F-4956-8CD9-971C308BBAE3}</Project>
+      <Name>Desktop</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff2" />
   </ItemGroup>
@@ -310,7 +317,7 @@
         <WebProjectProperties>
           <UseIIS>True</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
-          <DevelopmentServerPort>60277</DevelopmentServerPort>
+          <DevelopmentServerPort>51848</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
           <IISUrl>http://localhost:60238/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>

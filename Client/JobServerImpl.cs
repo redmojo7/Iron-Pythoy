@@ -1,8 +1,8 @@
-﻿using Client.Common;
+﻿using Desktop.Common;
 using System.Linq;
 
 
-namespace Client
+namespace Desktop
 {
     internal class JobServerImpl : JobServerInterface
     {
