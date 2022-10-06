@@ -238,6 +238,9 @@ namespace Desktop
                         catch (Exception e)
                         {
                             Console.WriteLine($"Exception: execute script failed : {e.Message}");
+                            // upload solutions 
+                            uploadSolution(clientInfo, myClientId, job.jobId, null);
+                            MessageBox.Show(e.Message, "Message", MessageBoxButton.OK);
                         }
                     }
                 }

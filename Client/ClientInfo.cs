@@ -13,6 +13,7 @@ namespace Desktop
         {
             this.Host = Host;
             this.Port = Port;
+            this.Status = true;
         }
 
         public int Id { get; set; }
