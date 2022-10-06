@@ -20,5 +20,6 @@ namespace Desktop
         public int Port { get; set; }
         public bool Downloaded { get; set; }
         public bool Answered { get; set; }
+        public bool Status { get; set; }
     }
 }

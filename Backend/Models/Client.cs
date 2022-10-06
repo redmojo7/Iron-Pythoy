@@ -14,6 +14,11 @@ namespace Backend.Models
     
     public partial class Client
     {
+        public Client()
+        {
+            this.Status = true;
+        }
+
         public int Id { get; set; }
         public string Host { get; set; }
         public int Port { get; set; }

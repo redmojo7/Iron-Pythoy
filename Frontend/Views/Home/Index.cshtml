@@ -12,6 +12,7 @@
             <th>Id</th>
             <th>URL</th>
             <th>Num of Completed Jobs</th>
+            <th>Status</th>
           </tr>
         @foreach (var client in Model)
         {
@@ -19,6 +20,7 @@
                 <td>@client.Id</td>
                 <td>http://@client.Host:@client.Port</td>
                 <td>@client.NumCompletedJobs</td>
+                <td>@client.Status</td>
             </tr>
         }
     </table>
@@ -39,7 +41,8 @@
                     var $row = $('<tr>' +
                         "<td>" + data[i].id + "</td>" + 
                         "<td>http://" + data[i].host + ":" + data[i].port + "</td>" + 
-                        "<td>" + data[i].numCompletedJobs + "</td>");
+                        "<td>" + data[i].numCompletedJobs + "</td>" +
+                        "<td>" + data[i].status + "</td>");
                     $("#dataTableDetail").append($row);
   
                 }

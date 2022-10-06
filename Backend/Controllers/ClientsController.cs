@@ -47,11 +47,26 @@ namespace Backend.Controllers
                     foobFactory.Close();
 
                     // add into clientInfos
-                    clientInfos.Add(new ClientInfo(client.Id, client.Host, client.Port, numCompletedJobs));
+                    clientInfos.Add(new ClientInfo(client.Id, client.Host, client.Port, numCompletedJobs, true));
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine($"Exception connect to {URL} failed : {e.Message}");
+                    //
+                    clientInfos.Add(new ClientInfo(client.Id, client.Host, client.Port, 0, false));
+                    // save states
+                    client.Status = false;
+                    db.Entry(client).State = EntityState.Modified;
+                }
+                
+
+                try
+                {
+                    db.SaveChanges();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    throw;
                 }
             }
             return Ok(clientInfos);
