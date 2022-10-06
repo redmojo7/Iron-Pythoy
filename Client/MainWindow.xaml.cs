@@ -21,6 +21,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using static IronPython.Modules._ast;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Desktop
 {
@@ -250,9 +251,27 @@ namespace Desktop
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            string script = ConvertRichTextBoxContentsToString(paythonRichText);  
-            MyJob.jobs.Add(new Job(script, aliveClients));
+            // RichText to string
+            string script = ConvertRichTextBoxContentsToString(paythonRichText);
+            // encode string with Base 64
+            string encodedScript = EncodeWithBase64(script);
+            // add job to jobs list
+            MyJob.jobs.Add(new Job(encodedScript, aliveClients));
             Console.WriteLine("Submitting");
+        }
+
+        private static string EncodeWithBase64(string script)
+        {
+            byte[] scriptBytes = Encoding.UTF8.GetBytes(script);
+            string encodedScript = Convert.ToBase64String(scriptBytes);
+            return encodedScript;
+        }
+
+        private static string DecodeWithBase64(string encodedScript)
+        {
+            byte[] encodedBytes = Convert.FromBase64String(encodedScript);
+            string script = Encoding.UTF8.GetString(encodedBytes);
+            return script;
         }
 
         private void UpdateMessage(string msg)
