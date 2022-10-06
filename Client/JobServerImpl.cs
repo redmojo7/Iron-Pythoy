@@ -26,10 +26,11 @@ namespace Desktop
             }
         }
 
-        public void DownloadJob(out string script, out int jobId)
+        public void DownloadJob(out string script, out byte[] hash, out int jobId)
         {
             script = null;
             jobId = -1;
+            hash = null;
             if (MyJob.jobs != null && MyJob.jobs.Count > 0) 
             {
                 foreach (Job tempJob in MyJob.jobs) 
@@ -40,6 +41,7 @@ namespace Desktop
                             // return the first job which has not be downloaded by this client
                             jobId = tempJob.Id;
                             script = tempJob.Script;
+                            hash = tempJob.Hash;
                             info.Downloaded = true;
                             return;
                         }

@@ -1,5 +1,6 @@
 ﻿
 using Desktop.Common;
+using IronPython.Compiler.Ast;
 using IronPython.Hosting;
 using Microsoft.Scripting.Hosting;
 using Newtonsoft.Json;
@@ -7,6 +8,7 @@ using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.ServiceModel;
 using System.Text;
 using System.Threading;
@@ -167,10 +169,11 @@ namespace Desktop
             }
         }
 
-        private (int jobId, string script) dowmloadJob(ClientInfo clientInfo)
+        private (int jobId, string script, byte[] hash) dowmloadJob(ClientInfo clientInfo)
         {
             string script = null;
             int jobId = -1;
+            byte[] hash = null;
             string URL = "net.tcp://" + clientInfo.Host + ":" + clientInfo.Port + "/JobServer";
             try
             {
@@ -181,14 +184,14 @@ namespace Desktop
                 Console.WriteLine($"dowmloadJob from {URL}");
                 foobFactory = new ChannelFactory<JobServerInterface>(netTcpBinding, URL);
                 foob = foobFactory.CreateChannel();
-                foob.DownloadJob(out script, out jobId);
+                foob.DownloadJob(out script, out hash, out jobId);
                 foobFactory.Close();
             }
             catch (Exception e)
             {
                 Console.WriteLine($"Exception: connect to {URL} failed : {e.Message}");
             }
-            return (jobId: jobId, script: script);
+            return (jobId: jobId, script: script, hash: hash);
         }
 
         private void uploadSolution(ClientInfo clientInfo, int myClientId, int jobId, dynamic dynamicResult)
@@ -230,7 +233,20 @@ namespace Desktop
                     {
                         try
                         {
-                            string script = DecodeWithBase64(job.script);
+                            var secureScript = DecodeWithBase64(job.script);
+                            string script = secureScript.script;
+                            // veryfy hash
+                            bool same = VerifyHash(secureScript.hash, job.hash);
+                            // Display whether or not the hash values are the same.
+                            if (same)
+                            {
+                                Console.WriteLine("The hash codes match.");
+                            }
+                            else
+                            {
+                                Console.WriteLine("The hash codes do not match.");
+                            }
+                            // excute script
                             Console.WriteLine($"Execue script : {script}");
                             dynamic dynamicResult = python.Execute(script);
                             Console.WriteLine($"dynamic result: {dynamicResult}");
@@ -249,30 +265,47 @@ namespace Desktop
             }
         }
 
+        private bool VerifyHash(byte[] compareHashValue, byte[] sentHashValue)
+        {
+            bool same = true;
+            //Compare the values of the two byte arrays.
+            for (int x = 0; x < sentHashValue.Length; x++)
+            {
+                if (sentHashValue[x] != compareHashValue[x])
+                {
+                    same = false;
+                }
+            }
+            return same;
+        }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             // RichText to string
             string script = ConvertRichTextBoxContentsToString(paythonRichText);
             // encode string with Base 64
-            string encodedScript = EncodeWithBase64(script);
+            var secureScript = EncodeWithBase64(script);
+            string encodedScript = secureScript.encodedScript;
+            byte[] hash = secureScript.hash;
             // add job to jobs list
-            MyJob.jobs.Add(new Job(encodedScript, aliveClients));
+            MyJob.jobs.Add(new Job(encodedScript, hash, aliveClients));
             Console.WriteLine("Submitting");
         }
 
-        private static string EncodeWithBase64(string script)
+        private static (string encodedScript, byte[] hash) EncodeWithBase64(string script)
         {
             byte[] scriptBytes = Encoding.UTF8.GetBytes(script);
+            byte[] hash = SHA256.Create().ComputeHash(scriptBytes);
             string encodedScript = Convert.ToBase64String(scriptBytes);
-            return encodedScript;
+            return (encodedScript: encodedScript, hash: hash);
         }
 
-        private static string DecodeWithBase64(string encodedScript)
+        private static (string script, byte[] hash) DecodeWithBase64(string encodedScript)
         {
             byte[] encodedBytes = Convert.FromBase64String(encodedScript);
+            byte[] hash = SHA256.Create().ComputeHash(encodedBytes);
             string script = Encoding.UTF8.GetString(encodedBytes);
-            return script;
+            return (script: script, hash: hash);
         }
 
         private void UpdateMessage(string msg)

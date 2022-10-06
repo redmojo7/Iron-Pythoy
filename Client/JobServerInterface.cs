@@ -6,7 +6,7 @@ namespace Desktop.Common
     public interface JobServerInterface
     {
         [OperationContract]
-        void DownloadJob(out string script, out int jobId);
+        void DownloadJob(out string script, out byte[] hash, out int jobId);
         [OperationContract]
         void UploadSolution(int jobId, int clientId, dynamic dynamicResult);
         [OperationContract]
