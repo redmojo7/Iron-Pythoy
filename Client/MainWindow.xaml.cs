@@ -1,4 +1,5 @@
 ﻿
+using Client;
 using Desktop.Common;
 using IronPython.Compiler.Ast;
 using IronPython.Hosting;
@@ -233,6 +234,7 @@ namespace Desktop
                     {
                         try
                         {
+                            // decode script
                             var secureScript = DecodeWithBase64(job.script);
                             string script = secureScript.script;
                             // veryfy hash
@@ -245,6 +247,7 @@ namespace Desktop
                             else
                             {
                                 Console.WriteLine("The hash codes do not match.");
+                                throw new InvalidHashException("The hash codes do not match.");
                             }
                             // excute script
                             Console.WriteLine($"Execue script : {script}");
@@ -252,6 +255,13 @@ namespace Desktop
                             Console.WriteLine($"dynamic result: {dynamicResult}");
                             // upload solutions 
                             uploadSolution(clientInfo, myClientId, job.jobId, dynamicResult);
+                        }
+                        catch (InvalidHashException ihe)
+                        {
+                            Console.WriteLine($"Exception : {ihe.Message}");
+                            // upload solutions 
+                            uploadSolution(clientInfo, myClientId, job.jobId, null);
+                            MessageBox.Show(ihe.Message, "Message", MessageBoxButton.OK);
                         }
                         catch (Exception e)
                         {
