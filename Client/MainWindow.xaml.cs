@@ -47,7 +47,7 @@ namespace Desktop
 
         private int myClientId;
 
-        //private StudentBusinessServerInterface foob;
+        Random random = new Random();
 
         public MainWindow()
         {
@@ -129,7 +129,7 @@ namespace Desktop
                 {
                     List<ClientInfo> ClientInfos = JsonConvert.DeserializeObject<List<ClientInfo>>(restResponse.Content);
                     // update aliveClients
-                    aliveClients = ClientInfos.Where(x => 
+                    aliveClients = ClientInfos.Where(c =>c.Status == true).Where(x => 
                         (x.Host!=myHost) || (x.Host == myHost && x.Port != myEendpoint)
                     ).ToList();
                     Console.WriteLine(aliveClients);
@@ -222,7 +222,7 @@ namespace Desktop
 
                 // onnect to the .NET Remoting server at the IP address and port in the list
                 // query if any jobs exist and download them.
-                foreach (ClientInfo clientInfo in aliveClients)
+                foreach (ClientInfo clientInfo in aliveClients.OrderBy(x => random.Next()))
                 {
                     var job = dowmloadJob(clientInfo);
                     if (job.script != null)
@@ -240,17 +240,6 @@ namespace Desktop
                             Console.WriteLine($"Exception: execute script failed : {e.Message}");
                         }
                     }
-                }
-
-                if (jobs.Count != 0)
-                {
-                    // read from jobs
-                    string script = jobs[0];
-                    dynamic dynamicResult = python.Execute(script);
-                    Console.WriteLine($"dynamic result: {dynamicResult}");
-  
-                    // remove from jobs
-                    jobs.Remove(script);
                 }
             }
         }
