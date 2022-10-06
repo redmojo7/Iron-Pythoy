@@ -1,5 +1,4 @@
 ﻿
-using Client;
 using Desktop.Common;
 using IronPython.Compiler.Ast;
 using IronPython.Hosting;

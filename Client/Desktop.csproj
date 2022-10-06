@@ -121,6 +121,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ClientInfo.cs" />
+    <Compile Include="InvalidHashException.cs" />
     <Compile Include="Job.cs" />
     <Compile Include="JobServerImpl.cs" />
     <Compile Include="JobServerInterface.cs" />
