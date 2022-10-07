@@ -132,9 +132,7 @@ namespace Desktop
                 {
                     List<ClientInfo> ClientInfos = JsonConvert.DeserializeObject<List<ClientInfo>>(restResponse.Content);
                     // update aliveClients
-                    aliveClients = ClientInfos.Where(c =>c.Status == true).Where(x => 
-                        (x.Host!=myHost) || (x.Host == myHost && x.Port != myEendpoint)
-                    ).ToList();
+                    aliveClients = ClientInfos.Where(c =>c.Status == true).ToList();
                     Console.WriteLine(aliveClients);
                 }
 
