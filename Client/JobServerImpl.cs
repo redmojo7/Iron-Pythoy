@@ -53,6 +53,7 @@ namespace Desktop
 
         public void FetchJobInfo(out int numCompletedJobs)
         {
+            /*
             numCompletedJobs = 0;
             if (MyJob.jobs != null && MyJob.jobs.Count > 0)
             {
@@ -66,6 +67,8 @@ namespace Desktop
                     }
                 }
             }
+            */
+            numCompletedJobs = MyJob.numCompletedJobs;
         }
 
         public void ReDownloadJob(int jobId)

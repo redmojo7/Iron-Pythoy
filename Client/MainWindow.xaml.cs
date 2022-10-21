@@ -239,7 +239,6 @@ namespace Desktop
             {
                 Console.WriteLine($"Exception: connect to {URL} failed : {e.Message}");
             }
-            return (jobId: jobId, script: script, hash: hash);
         }
 
 
@@ -282,6 +281,7 @@ namespace Desktop
                             Console.WriteLine($"dynamic result: {dynamicResult}");
                             // upload solutions 
                             uploadSolution(clientInfo, myClientId, job.jobId, dynamicResult);
+                            MyJob.numCompletedJobs += 1;
                         }
                         catch (InvalidHashException ihe)
                         {
@@ -298,6 +298,7 @@ namespace Desktop
                             Console.WriteLine($"Exception: execute script failed : {e.Message}");
                             // upload solutions 
                             uploadSolution(clientInfo, myClientId, job.jobId, null);
+                            MyJob.numCompletedJobs += 1;
                             MessageBox.Show(e.Message, "Message", MessageBoxButton.OK);
                         }
                     }

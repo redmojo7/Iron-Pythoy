@@ -9,5 +9,7 @@ namespace Desktop
     internal class MyJob
     {
         internal static List<Job> jobs = new List<Job>();
+
+        internal static int numCompletedJobs = 0;
     }
 }
