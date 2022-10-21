@@ -11,5 +11,7 @@ namespace Desktop.Common
         void UploadSolution(int jobId, int clientId, dynamic dynamicResult);
         [OperationContract]
         void FetchJobInfo(out int numCompletedJobs);
+        [OperationContract]
+        void ReDownloadJob(int jobId);
     }
 }

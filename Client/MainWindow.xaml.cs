@@ -124,46 +124,53 @@ namespace Desktop
 
                 // The first part needs to query the Web Service for a list of other clients
                 // Look for new clients'
-
-                RestClient client = new RestClient(URL);
-                RestRequest restRequest = new RestRequest("api/Clients", Method.Get);
-                RestResponse restResponse = client.Execute(restRequest);
-                if (restResponse.IsSuccessful)
+                try
                 {
-                    List<ClientInfo> ClientInfos = JsonConvert.DeserializeObject<List<ClientInfo>>(restResponse.Content);
-                    // update aliveClients
-                    aliveClients = ClientInfos.Where(c =>c.Status == true).ToList();
-                    Console.WriteLine(aliveClients);
-                }
-
-                else if (restResponse.StatusCode == System.Net.HttpStatusCode.NotFound)
-                {
-                    MessageBox.Show("Get fail! NotFound!", "Message", MessageBoxButton.OK);
-                }
-                else
-                {
-                    Console.WriteLine(restResponse.Content);
-                    MessageBox.Show("Get fail!", "Error", MessageBoxButton.OK);
-                }
-
-                // refresh GUI
-                Dispatcher.Invoke(() => {
-                    // clears
-                    jobListView.Items.Clear();
-                    foreach (Job temp in MyJob.jobs)
+                    RestClient client = new RestClient(URL);
+                    RestRequest restRequest = new RestRequest("api/Clients", Method.Get);
+                    RestResponse restResponse = client.Execute(restRequest);
+                    if (restResponse.IsSuccessful)
                     {
-                        int numCompleted = temp.ClientInfos.FindAll(x => x.Answered).Count();
-                        int numTotal = temp.ClientInfos.Count();
-                        // refresh
-                        jobListView.Items.Add(new
-                        {
-                            Id = temp.Id,
-                            Status = numCompleted == numTotal ? "Done" : "Working",
-                            Total = numTotal,
-                            Finished = numCompleted
-                        });
+                        List<ClientInfo> ClientInfos = JsonConvert.DeserializeObject<List<ClientInfo>>(restResponse.Content);
+                        // update aliveClients
+                        aliveClients = ClientInfos.Where(c => c.Status == true).ToList();
+                        Console.WriteLine(aliveClients);
                     }
-                });
+
+                    else if (restResponse.StatusCode == System.Net.HttpStatusCode.NotFound)
+                    {
+                        MessageBox.Show("Get fail! NotFound!", "Message", MessageBoxButton.OK);
+                    }
+                    else
+                    {
+                        Console.WriteLine(restResponse.Content);
+                        MessageBox.Show("Get fail!", "Error", MessageBoxButton.OK);
+                    }
+
+                    // refresh GUI
+                    Dispatcher.Invoke(() =>
+                    {
+                        // clears
+                        jobListView.Items.Clear();
+                        foreach (Job temp in MyJob.jobs)
+                        {
+                            int numCompleted = temp.ClientInfos.FindAll(x => x.Answered).Count();
+                            int numTotal = temp.ClientInfos.Count();
+                            // refresh
+                            jobListView.Items.Add(new
+                            {
+                                Id = temp.Id,
+                                Status = numCompleted == numTotal ? "Done" : "Working",
+                                Total = numTotal,
+                                Finished = numCompleted
+                            });
+                        }
+                    });
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Exception: NetworkingAsync : {e.Message}");
+                }
             }
         }
 
@@ -211,7 +218,30 @@ namespace Desktop
             {
                 Console.WriteLine($"Exception: connect to {URL} failed : {e.Message}");
             }
-}
+        }
+
+        private void redownloadJob(ClientInfo clientInfo, int jobId)
+        {
+            string URL = "net.tcp://" + clientInfo.Host + ":" + clientInfo.Port + "/JobServer";
+            try
+            {
+                // for client side
+                ChannelFactory<JobServerInterface> foobFactory;
+                NetTcpBinding netTcpBinding = new NetTcpBinding();
+                //Set the URL and create the connection!
+                Console.WriteLine($"redowmloadJob from {URL}");
+                foobFactory = new ChannelFactory<JobServerInterface>(netTcpBinding, URL);
+                foob = foobFactory.CreateChannel();
+                foob.ReDownloadJob(jobId);
+                foobFactory.Close();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Exception: connect to {URL} failed : {e.Message}");
+            }
+            return (jobId: jobId, script: script, hash: hash);
+        }
+
 
         private void ServerAsync()
         {
@@ -257,7 +287,10 @@ namespace Desktop
                         {
                             Console.WriteLine($"Exception : {ihe.Message}");
                             // upload solutions 
-                            uploadSolution(clientInfo, myClientId, job.jobId, null);
+                            // skip it this time, try dowmload it again
+                            //uploadSolution(clientInfo, myClientId, job.jobId, null);
+                            redownloadJob(clientInfo, job.jobId);
+
                             MessageBox.Show(ihe.Message, "Message", MessageBoxButton.OK);
                         }
                         catch (Exception e)
@@ -271,6 +304,7 @@ namespace Desktop
                 }
             }
         }
+
 
         private bool VerifyHash(byte[] compareHashValue, byte[] sentHashValue)
         {

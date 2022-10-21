@@ -1,4 +1,5 @@
 ﻿using Desktop.Common;
+using Microsoft.Scripting.Hosting;
 using System.Linq;
 
 
@@ -62,6 +63,24 @@ namespace Desktop
                     if (numCompleted == numTotal)
                     {
                         numCompletedJobs++;
+                    }
+                }
+            }
+        }
+
+        public void ReDownloadJob(int jobId)
+        {
+            if (MyJob.jobs != null && MyJob.jobs.Count > 0)
+            {
+                foreach (Job tempJob in MyJob.jobs)
+                {
+                    foreach (ClientInfo info in tempJob.ClientInfos)
+                    {
+                        if (tempJob.Id == jobId)
+                        {
+                            info.Downloaded = false;
+                            return;
+                        }
                     }
                 }
             }
